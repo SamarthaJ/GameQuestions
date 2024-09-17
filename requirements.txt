@@ -1,2 +1,3 @@
 customtkinter
 sentence-transformers
+nltk

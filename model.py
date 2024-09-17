@@ -117,4 +117,3 @@ class QuestionManager:
 
 if __name__ == "__main__":
     manager = QuestionManager()
-    manager.add_question("Never have I ever broken a leg")
