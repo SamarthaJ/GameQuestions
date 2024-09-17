@@ -10,7 +10,7 @@ class QuestionManager:
     """
     def __init__(self, json_file='questions.json'):
         self.json_file = json_file
-        self.model = SentenceTransformer('paraphrase-MiniLM-L6-v2') # pre-trained model from 
+        self.model = SentenceTransformer('paraphrase-MiniLM-L6-v2') # pre-trained model from Sentence Transformers library
         self.questions_data = self.load_questions()
     
     
@@ -31,27 +31,28 @@ class QuestionManager:
         with open(self.json_file, 'w') as file:
             json.dump(self.questions_data, file, indent=4)
 
-    
+        
     def add_question(self, new_question):
         """
         Add a new question to the list, if it is not redundant.
         """
-        new_embedding = self.model.encode(new_question, convert_to_tensor=True).tolist()
-
-        
-        if self.check_redundancy(new_question, new_embedding):
-            print("The question is redundant, not adding.")
-        else:
+        try:
+            new_embedding = self.model.encode(new_question, convert_to_tensor=True).tolist()
             
-            new_entry = {
-                "id": len(self.questions_data["questions"]) + 1,
-                "question_text": new_question,
-                "embedding": new_embedding,
-                "timestamp": datetime.now().isoformat()
-            }
-            self.questions_data["questions"].append(new_entry)
-            self.save_questions()  
-            print(f"Added question: '{new_question}'")
+            if self.check_redundancy(new_question, new_embedding):
+                print("The question is redundant, not adding.")
+            else:
+                new_entry = {
+                    "id": len(self.questions_data["questions"]) + 1,
+                    "question_text": new_question,
+                    "embedding": new_embedding,
+                    "timestamp": datetime.now().isoformat()
+                }
+                self.questions_data["questions"].append(new_entry)
+                self.save_questions()  
+                print(f"Added question: '{new_question}'")
+        except Exception as e:
+            print(f"An error occurred while adding the question: {e}")
 
     
     def check_redundancy(self, new_question, new_embedding):

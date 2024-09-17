@@ -10,9 +10,11 @@ def button_function():
     to show the new question.
     """
     new_question = entry.get()  
-    question_manager.add_question(new_question)  
-    result_label.configure(text=f"Question added: {new_question}")  
-
+    try:
+        question_manager.add_question(new_question)  
+        result_label.configure(text=f"Question added: {new_question}")  
+    except Exception as e:
+        result_label.configure(text=f"Error adding question: {e}")
 
 entry = customtkinter.CTkEntry(master=app, width=200)
 entry.place(relx=0.5, rely=0.3, anchor=customtkinter.CENTER)
