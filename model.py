@@ -1,7 +1,8 @@
 import json
 from datetime import datetime
 from sentence_transformers import SentenceTransformer, util
-from nltk.corpus import wordnet as wn  
+from nltk.corpus import wordnet as wn 
+import nltk 
 import os
 
 class QuestionManager:
@@ -57,18 +58,21 @@ class QuestionManager:
     
     def check_redundancy(self, new_question, new_embedding):
         """
-        Check if a question is redundant, by comparing it with all the existing questions.
+        Check if a question is redundant by comparing it with all existing questions.
         """
+        # Set a stricter threshold for detecting redundancy in full sentences
+        similarity_threshold = 0.85
+    
         for question in self.questions_data["questions"]:
             stored_embedding = question["embedding"]
+            # Calculate cosine similarity between the embeddings
             similarity = util.pytorch_cos_sim(new_embedding, stored_embedding).item()
-            
-            
-            if similarity > 0.8:
+
+            if similarity > similarity_threshold:
                 print(f"Question '{new_question}' is semantically similar to '{question['question_text']}' with similarity {similarity}")
                 return True
 
-            
+            # Optionally, check word-level similarity (as it exists in the original code)
             if self.check_word_level_similarity(new_question, question["question_text"]):
                 print(f"Question '{new_question}' is similar at word level to '{question['question_text']}'")
                 return True
@@ -92,28 +96,37 @@ class QuestionManager:
             if not self.are_words_similar(new_word, stored_word):
                 return False
         return True
-
     
+    nltk.download('averaged_perceptron_tagger')
+
     def are_words_similar(self, word1, word2):
         """
-        Check if two words are similar.
+        Check if two words are similar based on direct match, synonym matching, and POS tagging.
         """
+        # Perform POS tagging
+        pos1 = nltk.pos_tag([word1])[0][1]
+        pos2 = nltk.pos_tag([word2])[0][1]
+
+        # Only proceed if words have the same part of speech (POS)
+        if pos1 != pos2:
+            return False
+
+        # Check if the words are identical
         if word1.lower() == word2.lower():
             return True
-        
-        
+
+        # Use WordNet synonyms to check word similarity
         synsets1 = wn.synsets(word1.lower())
         synsets2 = wn.synsets(word2.lower())
-        
+
         if synsets1 and synsets2:
-            
+            # Compare words based on WordNet's Wu-Palmer similarity
             for synset1 in synsets1:
                 for synset2 in synsets2:
-                    if synset1.wup_similarity(synset2) > 0.8:  
+                    if synset1.wup_similarity(synset2) and synset1.wup_similarity(synset2) > 0.8:
                         return True
+
         return False
-
-
 
 if __name__ == "__main__":
     manager = QuestionManager()
