@@ -15,4 +15,4 @@ chnage the directory same as app.py
     python app.py
 ```
 
-at first it will train the model and then it will open the 
+at first it will train the model and then it will open the

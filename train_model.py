@@ -3,7 +3,7 @@ from sentence_transformers import SentenceTransformer, InputExample, losses, uti
 from torch.utils.data import DataLoader
 
 # Load your dataset
-file_path = r'C:\Users\Shrey\Desktop\game\GameQuestions\train_data.csv'
+file_path = r'never_have_i_ever_train_data.csv'
 data = pd.read_csv(file_path)
 
 # Convert the dataset into InputExample format
@@ -23,7 +23,7 @@ train_dataloader = DataLoader(train_examples, shuffle=True, batch_size=16)
 # Fine-tune the model
 model.fit(
     train_objectives=[(train_dataloader, train_loss)],
-    epochs=3,  # Adjust based on dataset size
+    epochs=12,  # Adjust based on dataset size
     warmup_steps=100,
     show_progress_bar=True
 )
