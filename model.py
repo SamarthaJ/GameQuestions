@@ -66,11 +66,11 @@ class QuestionManager:
             return f"An error occurred during evaluation: {e}"
 
     def check_redundancy(self, new_question, new_embedding):
-        similarity_threshold = 0.80  # Consider lowering this
+        similarity_threshold = 0.70  # Adjust as needed
 
         for question in self.questions_data["questions"]:
             stored_embedding = question["embedding"]
-            similarity = util.pytorch_cos_sim(new_embedding, stored_embedding).item()
+            similarity = self.calculate_similarity(new_embedding, stored_embedding)
             print(f"Comparing '{new_question}' with '{question['question_text']}': similarity = {similarity:.2f}")
 
             if similarity > similarity_threshold:
@@ -78,6 +78,11 @@ class QuestionManager:
 
         return False, "The question is not redundant."
 
+    def calculate_similarity(self, new_embedding, stored_embedding):
+        """
+        Calculate the cosine similarity between two embeddings.
+        """
+        return util.pytorch_cos_sim(new_embedding, stored_embedding).item()
 
     def check_word_level_similarity(self, new_question, stored_question):
         """
@@ -124,6 +129,10 @@ if __name__ == "__main__":
     manager = QuestionManager()
 
     # Example usage
-    new_question = "What are the rules of the game?"
+    new_question = "I've never gone on a trip by myself"
     result = manager.evaluate_question(new_question)
     print(result)
+
+    new_question2 = "Never have I ever traveled alone"
+    result2 = manager.evaluate_question(new_question2)
+    print(result2)
