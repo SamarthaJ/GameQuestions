@@ -32,14 +32,15 @@ class QuestionManager:
 
     def add_question(self, new_question):
         """
-        Add a new question to the list, if it is not redundant.
+        Add a new question to the list if it is not redundant.
+        Return result message and the question it was compared to if redundant.
         """
         try:
             new_embedding = self.model.encode(new_question, convert_to_tensor=True).tolist()
 
-            is_redundant, message = self.check_redundancy(new_question, new_embedding)
+            is_redundant, message, compared_question = self.check_redundancy(new_question, new_embedding)
             if is_redundant:
-                print(message)
+                return f"Redundant: {message}", compared_question
             else:
                 new_entry = {
                     "id": len(self.questions_data["questions"]) + 1,
@@ -48,10 +49,10 @@ class QuestionManager:
                     "timestamp": datetime.now().isoformat()
                 }
                 self.questions_data["questions"].append(new_entry)
-                self.save_questions()  
-                print(f"Added question: '{new_question}'")
+                self.save_questions()
+                return f"Added question: '{new_question}'", None
         except Exception as e:
-            print(f"An error occurred while adding the question: {e}")
+            return f"An error occurred while adding the question: {e}", None
 
     def evaluate_question(self, new_question):
         """
@@ -74,9 +75,9 @@ class QuestionManager:
             print(f"Comparing '{new_question}' with '{question['question_text']}': similarity = {similarity:.2f}")
 
             if similarity > similarity_threshold:
-                return True, f"The question '{new_question}' is redundant; similar to '{question['question_text']}' with similarity {similarity:.2f}."
+                return True, f"similar to '{question['question_text']}' with similarity {similarity:.2f}.", question['question_text']
 
-        return False, "The question is not redundant."
+        return False, "The question is not redundant.", None
 
     def calculate_similarity(self, new_embedding, stored_embedding):
         """
@@ -124,15 +125,3 @@ class QuestionManager:
                         return True
 
         return False
-
-if __name__ == "__main__":
-    manager = QuestionManager()
-
-    # Example usage
-    new_question = "I've never gone on a trip by myself"
-    result = manager.evaluate_question(new_question)
-    print(result)
-
-    new_question2 = "Never have I ever traveled alone"
-    result2 = manager.evaluate_question(new_question2)
-    print(result2)
