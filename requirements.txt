@@ -2,3 +2,4 @@ customtkinter
 sentence-transformers
 nltk
 xlsxwriter
+openpyxl
